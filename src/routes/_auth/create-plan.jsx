@@ -14,6 +14,7 @@ import { VIBES, TAGS } from '@/lib/constants';
 const CreatePlan = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const searchParams = Route.useSearch();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // Multi-step wizard
 
@@ -22,13 +23,13 @@ const CreatePlan = () => {
   const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
+    title: searchParams.title || '',
+    description: searchParams.description || '',
     date: '',
     time: '',
-    location: '',
+    location: searchParams.location || '',
     locationCoords: null,
-    vibe: 'chill',
+    vibe: searchParams.vibe || 'chill',
     maxParticipants: 5,
     coverImage: '',
     tags: [],
@@ -393,4 +394,10 @@ const CreatePlan = () => {
 
 export const Route = createFileRoute('/_auth/create-plan')({
   component: CreatePlan,
+  validateSearch: (search) => ({
+    title: search.title || '',
+    description: search.description || '',
+    location: search.location || '',
+    vibe: search.vibe || 'chill',
+  }),
 });

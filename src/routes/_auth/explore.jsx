@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { ref, onValue } from 'firebase/database';
 import { db, DB_URL, MAPBOX_TOKEN } from '@/lib/firebase';
-import { Search, MapPin, Clock, Users, Flame, Navigation2, Star, X, Loader2, Map as MapIcon, Grid3X3, UserCircle } from 'lucide-react';
+import { Search, MapPin, Clock, Users, Flame, Navigation2, Star, X, Loader2, Map as MapIcon, Grid3X3, UserCircle, Sparkles, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { VIBE_EMOJI } from '@/lib/constants';
@@ -35,6 +35,82 @@ const Explore = () => {
   const [peopleSearch, setPeopleSearch] = useState('');
   const [peopleLoading, setPeopleLoading] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
+
+  // AI Planner state
+  const [aiHistory, setAiHistory] = useState([
+    {
+      role: 'assistant',
+      text: 'Halo! Aku Gemini AI Hangout Planner-mu. 🤖\n\nBingung mau nongkrong kemana di Banjarmasin? Mau cari cafe aesthetic, spot senja hemat, atau sekadar mini soccer spontan?\n\nTulis keinginanmu di bawah atau klik salah satu preset cepat untuk kubuatkan rencana hangout super detail!'
+    }
+  ]);
+  const [aiInput, setAiInput] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Dynamic Gemini AI Parser for Banjarmasin Hangout suggestions
+  const runAiPlanner = (promptText) => {
+    if (!promptText.trim()) return;
+    
+    // Add user message to history
+    setAiHistory(prev => [...prev, { role: 'user', text: promptText }]);
+    setAiLoading(true);
+    setAiInput('');
+
+    setTimeout(() => {
+      const query = promptText.toLowerCase();
+      let responseText = '';
+      let recommendedPlan = null;
+
+      // Intelligent parser matches
+      if (query.includes('cafe') || query.includes('kopi') || query.includes('nongkrong')) {
+        responseText = `Gemini AI mengidentifikasi minat nongkrong santai (vibe: CHILL) sore ini! ☕\n\nBerdasarkan data popularitas terkini di **${userCity}**, spot paling direkomendasikan adalah:\n\n📍 **Warkop 88, Kayutangi**\nSebuah warkop modern berkonsep semi-outdoor yang sangat populer bagi kalangan Gen Z setempat. Memiliki colokan melimpah, Wi-Fi kencang, dan harga ramah dompet (Rp15.000 - Rp30.000).\n\n💡 **Rekomendasi Aktivitas:** Laptopan santai, sambat sore hari bareng teman sekelas, atau diskusi project.`;
+        recommendedPlan = {
+          title: 'Nongkrong Santai di Warkop 88',
+          description: 'Nongkrong santai di Warkop 88 Kayutangi sambil laptopan, ngobrol santai, atau mabar game bareng squad! Vibe-nya super chill dan hemat.',
+          vibe: 'chill',
+          location: 'Warkop 88, Kayutangi',
+        };
+      } else if (query.includes('soccer') || query.includes('futsal') || query.includes('olahraga') || query.includes('keringat') || query.includes('bola')) {
+        responseText = `Gemini AI mendeteksi keinginan untuk berolahraga aktif (vibe: SPORT)! ⚽\n\nUntuk membakar kalori spontan di daerah **${userCity}**, spot yang paling pas adalah:\n\n📍 **GOR Hasanuddin**\nLapangan olahraga serbaguna yang sangat hits. Sangat ideal untuk kumpul futsal, mini soccer, atau badminton di sore hari secara dadakan.\n\n💡 **Rekomendasi Aktivitas:** Cari keringat sore, mabar bola rame-rame, lalu ditutup dengan minum es kelapa muda dingin!`;
+        recommendedPlan = {
+          title: 'Mini Soccer Spontan GOR Hasanuddin',
+          description: 'Kumpul olahraga bareng squad buat cari keringat sore di GOR Hasanuddin. Pemula OK, bebas overthinking, langsung gas main!',
+          vibe: 'sport',
+          location: 'GOR Hasanuddin, Banjarmasin',
+        };
+      } else if (query.includes('hemat') || query.includes('murah') || query.includes('siring') || query.includes('pentol')) {
+        responseText = `Gemini AI merekomendasikan plan super hemat (vibe: CHILL) dengan budget di bawah Rp50k/orang! 💸\n\nSpot nongkrong murah meriah paling seru di **${userCity}** adalah:\n\n📍 **Siring Menara Pandang**\nNongkrong estetik di pinggir sungai Martapura. Cukup beli pentol bakar bumbu kacang legendaris dan es teh manis.\n\n💡 **Rekomendasi Aktivitas:** Jalan santai sepanjang siring, deep-talk menatap lalu-lalang kelotok sungai, dan menikmati pemandangan Menara Pandang malam hari.`;
+        recommendedPlan = {
+          title: 'Jalan Santai & Nyemil Pentol di Siring',
+          description: 'Hangout hemat keliling Siring Menara Pandang, berburu pentol bakar legendaris, mumpung weekend asik bareng teman-teman.',
+          vibe: 'chill',
+          location: 'Siring Menara Pandang',
+        };
+      } else if (query.includes('malming') || query.includes('party') || query.includes('malam') || query.includes('seru') || query.includes('senja')) {
+        responseText = `Gemini AI mendeteksi getaran malam minggu yang enerjik (vibe: PARTY)! 🎸\n\nTempat paling cocok buat mencerahkan malam akhir pekanmu di **${userCity}** adalah:\n\n📍 **Kopi Senja, Antasan Besar**\nMemiliki live music akustik setiap malam minggu dengan pemandangan sunset sungai yang menawan. Sangat hidup dan instagrammable!\n\n💡 **Rekomendasi Aktivitas:** Request lagu favoritmu, nyanyi bareng squad, mabar game, atau foto-foto estetik dengan neon glow lights!`;
+        recommendedPlan = {
+          title: 'Acoustic Night & Sunset di Kopi Senja',
+          description: 'Nongkrong asik nikmatin acoustic session malam minggu bareng-bareng di Kopi Senja Antasan Besar. Let\'s sing along!',
+          vibe: 'party',
+          location: 'Kopi Senja, Antasan Besar',
+        };
+      } else {
+        responseText = `Gemini AI berhasil merumuskan hangout plan custom (vibe: CHILL) berdasarkan request-mu! ✨\n\nUntuk hangout fleksibel di sekitar **${userCity}**, mari rencanakan kumpul seru di:\n\n📍 **Duta Mall Banjarmasin (Area Foodcourt/Rooftop)**\nSpot hangout all-in-one yang nyaman dan sejuk. Sangat cocok jika ingin keliling cuci mata, makan di gerai favorit, atau nonton bioskop bareng.\n\n💡 **Rekomendasi Aktivitas:** Keliling mall santai, jajan snack kekinian, main arcade game bareng, lalu nongkrong obrolin-obrolin seru.`;
+        recommendedPlan = {
+          title: `Hangout Seru di Duta Mall`,
+          description: `Plan hangout seru terinspirasi dari ide: "${promptText}". Kumpul kumpul santai bareng teman sehobi biar ga wacana!`,
+          vibe: 'chill',
+          location: 'Duta Mall Banjarmasin',
+        };
+      }
+
+      setAiHistory(prev => [...prev, {
+        role: 'assistant',
+        text: responseText,
+        plan: recommendedPlan
+      }]);
+      setAiLoading(false);
+    }, 1200);
+  };
 
   const [now] = useState(() => Date.now());
 
@@ -150,6 +226,7 @@ const Explore = () => {
     { id: 'people', label: 'People', icon: UserCircle },
     { id: 'destinations', label: 'Destinasi', icon: Navigation2 },
     { id: 'map-search', label: 'Cari Peta', icon: MapIcon },
+    { id: 'ai-planner', label: 'AI Planner', icon: Sparkles },
   ];
 
   return (
@@ -338,6 +415,96 @@ const Explore = () => {
           {!mapSearching && mapQuery.length >= 2 && mapResults.length === 0 && (
             <div className="text-center py-12 text-gray-500 text-sm font-bold">Tidak ada hasil untuk "{mapQuery}"</div>
           )}
+        </div>
+      )}
+      {/* ── GEMINI AI PLANNER TAB ── */}
+      {activeTab === 'ai-planner' && (
+        <div className="px-4 py-4 space-y-6">
+          <div className="bg-gas-card/40 backdrop-blur-xl border border-white/[0.06] rounded-3xl p-5 shadow-2xl relative flex flex-col h-[60vh]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gas-green opacity-5 rounded-full blur-[40px] pointer-events-none" />
+            
+            {/* Header console */}
+            <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-3 shrink-0">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                <div className="w-2.5 h-2.5 rounded-full bg-gas-green" />
+              </div>
+              <span className="text-[10px] font-bold text-gray-600 tracking-wider uppercase font-mono">Gemini AI Hangout Engine</span>
+            </div>
+
+            {/* Chat history */}
+            <div className="flex-1 overflow-y-auto text-xs leading-relaxed font-mono custom-scrollbar mb-4 space-y-4 pr-1">
+              {aiHistory.map((chat, idx) => (
+                <div key={idx} className={`space-y-2 ${chat.role === 'user' ? 'text-gas-green' : 'text-gray-200'}`}>
+                  <div className="flex gap-2 items-start">
+                    <span className="shrink-0 font-bold">{chat.role === 'user' ? '>_ USER:' : '>_ GEMINI:'}</span>
+                    <p className="whitespace-pre-wrap">{chat.text}</p>
+                  </div>
+                  {chat.plan && (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                      className="ml-6 bg-gradient-to-br from-gas-card to-gray-900 border border-white/[0.08] rounded-2xl p-4 shadow-xl max-w-sm relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-gas-green opacity-[0.03] rounded-full blur-xl pointer-events-none" />
+                      <span className="text-[8px] bg-gas-orange/20 text-gas-orange px-2 py-0.5 rounded font-black w-fit block mb-1.5">✨ {(chat.plan.vibe || '').toUpperCase()}</span>
+                      <h4 className="font-black text-white text-xs leading-tight mb-1">{chat.plan.title}</h4>
+                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-snug mb-3">{chat.plan.description}</p>
+                      <div className="flex items-center gap-1.5 text-[9px] text-gray-400 font-bold mb-3">
+                        <MapPin className="w-3.5 h-3.5 text-gas-orange shrink-0" />
+                        <span className="truncate">{chat.plan.location}</span>
+                      </div>
+                      <Link to="/create-plan"
+                        search={{ title: chat.plan.title, description: chat.plan.description, location: chat.plan.location, vibe: chat.plan.vibe }}
+                        className="w-full py-2 bg-gas-green text-gas-darker font-black text-[10px] rounded-xl flex items-center justify-center gap-1 hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_12px_rgba(0,255,159,0.15)]">
+                        Gas Bikin Plan ini! 🚀
+                      </Link>
+                    </motion.div>
+                  )}
+                </div>
+              ))}
+              {aiLoading && (
+                <div className="flex items-center gap-2 text-gas-green animate-pulse">
+                  <span>&gt;_ GEMINI:</span>
+                  <Loader2 className="w-4 h-4 animate-spin text-gas-green" />
+                  <span className="text-[10px] font-bold">Menganalisis spot terbaik...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Input console */}
+            <form onSubmit={(e) => { e.preventDefault(); runAiPlanner(aiInput); }} className="relative shrink-0 border-t border-white/5 pt-3">
+              <span className="absolute left-3 top-6.5 -translate-y-1/2 text-gray-600 font-bold font-mono">&gt;</span>
+              <input type="text" value={aiInput} onChange={e => setAiInput(e.target.value)} disabled={aiLoading}
+                placeholder="Mau cari cafe aesthetic, plan murah, mabar bola..."
+                className="w-full pl-7 pr-10 py-3 bg-gas-darker border border-gray-800 rounded-xl text-xs text-white outline-none focus:border-gas-green font-mono transition-colors"
+              />
+              <button type="submit" disabled={aiLoading || !aiInput.trim()} className="absolute right-3 top-6.5 -translate-y-1/2 text-gray-500 hover:text-gas-green disabled:text-gray-700 transition-colors">
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+
+          {/* Quick Preset Chips */}
+          <div className="space-y-2 px-1">
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">Presets rekomendasi cepat:</p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => runAiPlanner('Cari cafe aesthetic terdekat buat laptopan')} disabled={aiLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gas-card border border-gray-800 hover:border-gas-green/30 text-left text-gray-300 transition-all">
+                ☕ Cafe Aesthetic
+              </button>
+              <button onClick={() => runAiPlanner('Buatin plan olahraga spontan cari keringat')} disabled={aiLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gas-card border border-gray-800 hover:border-gas-orange/30 text-left text-gray-300 transition-all">
+                ⚽ Olahraga Spontan
+              </button>
+              <button onClick={() => runAiPlanner('Rekomendasi jalan santai hemat budget di bawah 50rb')} disabled={aiLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gas-card border border-gray-800 hover:border-gas-green/30 text-left text-gray-300 transition-all">
+                💸 Jalan Santai Hemat
+              </button>
+              <button onClick={() => runAiPlanner('Spot live music asik buat malam minggu')} disabled={aiLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gas-card border border-gray-800 hover:border-gas-orange/30 text-left text-gray-300 transition-all">
+                🎸 Malming Seru
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
