@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 .env
+.env.*
+!.env.example
+
+# Remotion Video Builds
+out
+/out
+promo-video/out
 
 # Editor directories and files
 .vscode/*

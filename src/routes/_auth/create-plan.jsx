@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useNavigate, createFileRoute } from '@tanstack/react-router';
 import { db } from '@/lib/firebase';
 import { ref, push, set, get } from 'firebase/database';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ArrowLeft, Sparkles, MapPin, Calendar, Clock, Loader2, ChevronRight, Users, Image, AlignLeft, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import LocationPicker from '@/components/ui/LocationPicker';
 import { useToastStore } from '@/store/useToastStore';
+
+const LocationPicker = lazy(() => import('@/components/ui/LocationPicker'));
 import { generateSlug } from '@/utils/slug';
 import { VIBES, TAGS } from '@/lib/constants';
 
@@ -368,12 +369,23 @@ const CreatePlan = () => {
 
       {/* ─── Location Picker ─── */}
       <AnimatePresence>
-        <LocationPicker
-          isOpen={showLocationPicker}
-          onClose={() => setShowLocationPicker(false)}
-          onSelect={handleLocationSelect}
-          currentLocation={formData.locationCoords ? { ...formData.locationCoords, name: formData.location } : null}
-        />
+        {showLocationPicker && (
+          <Suspense fallback={
+            <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 className="w-10 h-10 text-gas-green animate-spin mx-auto mb-2" />
+                <p className="text-white text-xs font-bold animate-pulse">Memuat Peta...</p>
+              </div>
+            </div>
+          }>
+            <LocationPicker
+              isOpen={showLocationPicker}
+              onClose={() => setShowLocationPicker(false)}
+              onSelect={handleLocationSelect}
+              currentLocation={formData.locationCoords ? { ...formData.locationCoords, name: formData.location } : null}
+            />
+          </Suspense>
+        )}
       </AnimatePresence>
     </div>
   );
