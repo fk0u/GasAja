@@ -1,0 +1,18 @@
+{
+  "name": "promo-video",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "remotion studio src/index.jsx",
+    "build": "remotion render src/index.jsx GasAjaPromo out/video.mp4",
+    "fetch-tts": "node scripts/fetch-tts.js"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "remotion": "^4.0.0",
+    "google-tts-api": "^2.0.2"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.0"
+  }
+}

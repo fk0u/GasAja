@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply bg-gas-darker text-white font-sans antialiased overflow-x-hidden;
+  }
+}
+
+@layer components {
+  /* Keyframes for subtle ambient animations */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  /* Gen Z Playful Buttons */
+  .btn-primary {
+    @apply bg-gas-green text-gas-darker font-black text-lg py-4 px-8 rounded-full transition-all duration-300 active:scale-90 shadow-[0_0_20px_rgba(0,255,159,0.3),inset_0_-4px_0_0_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(0,255,159,0.6),inset_0_-4px_0_0_rgba(0,0,0,0.1)];
+  }
+  .btn-secondary {
+    @apply bg-gas-card/80 backdrop-blur-md text-white font-bold py-3 px-6 rounded-full transition-all duration-300 active:scale-90 shadow-[0_4px_0_0_#2a2a2a] hover:-translate-y-1 hover:shadow-[0_6px_0_0_#2a2a2a,0_0_15px_rgba(255,255,255,0.1)] border-2 border-gray-700/50 hover:border-gray-500;
+  }
+  
+  /* Oversized playful inputs */
+  .input-field {
+    @apply bg-gas-dark/80 backdrop-blur-sm text-white placeholder-gray-500 border-2 border-gray-700/80 rounded-2xl px-5 py-4 text-lg w-full focus:outline-none focus:border-gas-green focus:shadow-[0_0_20px_rgba(0,255,159,0.25)] transition-all duration-300;
+  }
+  
+  /* Glassmorphism Utilities */
+  .glass-dock {
+    @apply bg-gas-darker/60 backdrop-blur-2xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)];
+  }
+  .glass-card {
+    @apply bg-gas-card/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 hover:bg-gas-card/50 hover:border-white/20;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gas-green via-[#00e1ff] to-gas-orange;
+    animation: pulse-glow 3s ease-in-out infinite;
+    background-size: 200% auto;
+  }
+  .text-gradient-green {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gas-green to-[#00bfff];
+  }
+
+  /* Bento Grid Card */
+  .bento-card {
+    @apply bg-gas-card/60 backdrop-blur-lg rounded-3xl p-5 border border-white/5 transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:shadow-[0_0_25px_rgba(0,255,159,0.1)] hover:border-gas-green/30;
+  }
+
+  /* Responsive page container — centers content on desktop */
+  .page-container {
+    @apply min-h-screen pb-24 md:pb-4 max-w-xl md:max-w-2xl lg:max-w-4xl mx-auto;
+  }
+
+  /* Responsive card hover — only on desktop */
+  @media (hover: hover) {
+    .hover-lift {
+      @apply hover:-translate-y-1.5 hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] transition-all duration-300;
+    }
+    .hover-glow-green {
+      @apply hover:shadow-[0_0_25px_rgba(0,255,159,0.2)] hover:border-gas-green/30 transition-all duration-300;
+    }
+  }
+}
+
+/* Custom Hide Scrollbar but keep functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Scrollbar for dark mode */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: #333; 
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}

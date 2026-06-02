@@ -1,0 +1,71 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth !== null",
+        "displayName": { ".write": "auth !== null && auth.uid === $uid" },
+        "bio": { ".write": "auth !== null && auth.uid === $uid" },
+        "avatar": { ".write": "auth !== null && auth.uid === $uid" },
+        "username": { ".write": "auth !== null && auth.uid === $uid" },
+        "location": { ".write": "auth !== null && auth.uid === $uid" },
+        "followingList": {
+          "$followingUid": {
+            ".write": "auth !== null && auth.uid === $uid"
+          }
+        },
+        "following": {
+          ".write": "auth !== null && auth.uid === $uid"
+        },
+        "settings": {
+          ".write": "auth !== null && auth.uid === $uid"
+        },
+        "savedPlans": {
+          "$planId": {
+            ".write": "auth !== null && auth.uid === $uid"
+          }
+        },
+        "followersList": {
+          "$followerUid": {
+            ".write": "auth !== null && auth.uid === $followerUid"
+          }
+        },
+        "followers": {
+          ".write": "auth !== null"
+        }
+      }
+    },
+    "usernames": {
+      ".read": "true",
+      "$username": {
+        ".write": "auth !== null && (!data.exists() || data.val() === auth.uid)"
+      },
+      ".indexOn": [".value"]
+    },
+    "plans": {
+      ".read": "true",
+      "$planId": {
+        ".write": "auth !== null"
+      },
+      ".indexOn": ["slug", "createdAt", "creatorId"]
+    },
+    "posts": {
+      ".read": "true",
+      "$postId": {
+        ".write": "auth !== null"
+      }
+    },
+    "stories": {
+      ".read": "true",
+      "$storyId": {
+        ".write": "auth !== null"
+      }
+    },
+    "notifications": {
+      "$uid": {
+        ".read": "auth !== null && auth.uid === $uid",
+        ".write": "auth !== null",
+        ".indexOn": ["createdAt"]
+      }
+    }
+  }
+}
